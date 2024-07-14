@@ -1,3 +1,4 @@
+npm install
 node server.js
 
 输入地址点击连接
