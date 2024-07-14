@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Client</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
+</head>
+<body>
+    <h1>WebSocket Client</h1>
+    <div>
+        <input type="text" id="addressInput" placeholder="Enter WebSocket address" value="wss:/localhost:5001/ws">
+        <button onclick="connectWebSocket()">Connect</button>
+        <button onclick="disconnectWebSocket()">Disconnect</button>
+    </div>
+    <div id="messages"></div>
+    <input type="text" id="messageInput" placeholder="Enter message">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        let ws;
+        let subscribeContent = new Set();
+        function connectWebSocket() {
+            const address = document.getElementById('addressInput').value;
+            ws = new WebSocket(address);
+            
+            ws.binaryType = 'arraybuffer';
+
+            ws.onopen = () => {
+                console.log('Connected to WebSocket server');
+                addMessage('Connected to WebSocket server');           
+            };
+
+            ws.onmessage = (event) => {
+                console.log('Received message event:', event);
+                let message = '';
+                let datas = null;
+                try {
+                    // Decode the message directly
+                 
+                    message = new TextDecoder().decode(pako.inflate(event.data));
+                    console.log('Decoded message:', message);
+                    if (message === 'ping') {
+                        console.log('Received: ping');
+                        addMessage('Received: ping');
+                        return; // Exit the function to avoid further processing
+                    } else if (message === 'pong') {
+                        console.log('Received: pong');
+                        addMessage('Received: pong');
+                        return; // Exit the function to avoid further processing
+                    } else {
+                        datas = JSON.parse(message);
+                    }
+                } catch (error) {
+                    console.log('Direct decode failed:', error);
+                    try {
+                        // Inflate and decode the message if the direct decode fails
+                      
+                        message = new TextDecoder().decode(event.data);
+                        console.log('Inflated and decoded message:', message);
+                        if (message === 'ping') {
+                            console.log('Received: ping');
+                            addMessage('Received: ping');
+                            return; // Exit the function to avoid further processing
+                        } else if (message === 'pong') {
+                            console.log('Received: pong');
+                            addMessage('Received: pong');
+                            return; // Exit the function to avoid further processing
+                        } else {
+                            datas = JSON.parse(message);
+                        }
+                    } catch (inflateError) {
+                        console.error('Error inflating/decoding message:', inflateError);
+                    }
+                }
+
+                if (datas) {
+                    console.log('Received data:', datas);
+                    addMessage(JSON.stringify(datas, null, 2));
+                } else {
+                    console.log('Received raw message:', message);
+                    addMessage(message);
+                }
+            };
+
+            ws.onclose = () => {
+                console.log('Disconnected from WebSocket server');
+                addMessage('Disconnected from WebSocket server');
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                addMessage('WebSocket error: ' + error.message);
+            };
+        }
+
+        function disconnectWebSocket() {
+            if (ws) {
+                ws.close();
+                ws = null;
+                console.log('WebSocket connection closed by user');
+                addMessage('WebSocket connection closed by user');
+            } else {
+                console.log('WebSocket is not connected');
+                addMessage('WebSocket is not connected');
+            }
+        }
+
+        function sendMessage() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                alert('WebSocket is not connected.');
+                return;
+            }
+
+            const input = document.getElementById('messageInput');
+            const message = input.value;
+            ws.send(message);
+            input.value = '';
+        }
+
+        function addMessage(message) {
+            const messagesDiv = document.getElementById('messages');
+            const messageElement = document.createElement('div');
+            messageElement.textContent = message;
+            messagesDiv.appendChild(messageElement);
+        }
+    </script>
+</body>
+</html>
