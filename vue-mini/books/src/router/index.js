@@ -2,12 +2,18 @@ import { createMemoryHistory,createRouter} from 'vue-router'
 import BookTable from '../components/BookTable.vue'
 import BookDetail from '../components/BookDetail.vue'
 import AboutMe from '../components/AboutMe.vue'; // 导入 About 组件
+import BookStoreWelcome from '../components/BookStoreWelcome.vue';
 
 const routes = [
     {
-        path: '/',
+        path: '/list',
         name: 'list',
         component: BookTable
+    },
+    {
+        path: '/',
+        name: 'bswelcome',
+        component: BookStoreWelcome
     },
     {
         path: '/book/:id',

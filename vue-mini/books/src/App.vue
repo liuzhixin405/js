@@ -1,21 +1,22 @@
 <template>
   <div id="app">
     <h1>图书管理系统</h1>
-    <BookTable :books="books"></BookTable>
-   
+    <!-- <BookTable :books="books"></BookTable> -->
+    <router-link to="/list">Home</router-link> |
+    <router-link to="/about">About</router-link>
     <router-view></router-view>
   </div>
   
 </template>
 
 <script>
-import BookTable from './components/BookTable.vue'
+//import BookTable from './components/BookTable.vue'
 import BookData from './data/books.json'
 export default {
   name: 'App',
-  components: {
-    BookTable
-  },
+  // components: {
+  //   BookTable
+  // },
   data() {
     return {
       books: BookData || [] // 确保 books 被正确初始化
