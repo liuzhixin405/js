@@ -15,18 +15,19 @@
       </div>
     </div>
     <div v-else>
-      <h1>欢迎</h1>
-      <button @click="logout">退出登录</button>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h1>欢迎</h1>
+        <button @click="logout" style="margin-right: 0;">退出登录</button>
+      </div>
       <p>{{ message }}</p>
     </div>
-    <Products />
+    <Products :products="products" />
   </div>
 </template>
 
 <script>
 import axios from 'axios';
 import Products from './modules/products/Products.vue';
-import { ref } from 'vue';
 
 export default {
   components: {
@@ -34,30 +35,14 @@ export default {
   },
   data() {
     return {
-      username: '',
+      username: localStorage.getItem('username') || '',
       password: '',
-      // token: localStorage.getItem('token'),
+      token: localStorage.getItem('token') || null,
       message: '',
-      errorMessage: '', // 新增错误消息
-      loading: false    // 新增加载状态
+      errorMessage: '',
+      loading: false,
+      products: []
     };
-  },
-  setup() {
-    // const token = ref(localStorage.getItem('token'));
-
-    const isLoggedIn = () => {
-      return this.token !== null;
-    };
-
-    return {
-      // token,
-      isLoggedIn
-    }
-  },
-  provide() {
-    return {
-      isLoggedIn: this.isLoggedIn
-    }
   },
   methods: {
     async login() {
@@ -75,8 +60,20 @@ export default {
         localStorage.setItem('token', this.token);
         this.message = '登录成功';
         
+        // 立即更新 localStorage 中的 token 值
+        localStorage.setItem('token', this.token);
+        localStorage.setItem('username', this.username);
+        console.log('token in localStorage:', localStorage.getItem('token'));
+
+        // 获取产品数据
+        this.getProducts();
+        console.log('login success, calling getProducts');
+        
+        // 强制组件重新渲染
+        this.$forceUpdate();
+
         // 清空输入框
-        this.username = '';
+        // this.username = '';
         this.password = '';
         
       } catch (error) {
@@ -108,22 +105,48 @@ export default {
       localStorage.removeItem('token');
       this.message = '';
       this.errorMessage = ''; // 清除错误消息
-      this.username = '';
+      // this.username = '';
       this.password = '';
-    }
-  },
-  
-  async mounted() {
-    if (this.token) {
+      this.products = [];
+    },
+    
+    async getProducts() {
       try {
-        const response = await axios.get('http://localhost:3000/protected', {
+        console.log('获取产品数据...');
+        const response = await axios.get('http://localhost:3000/products', {
           headers: {
             Authorization: this.token
           }
         });
-        this.message = response.data.message;
+        this.products = response.data;
+        console.log('产品数据:', response.data);
       } catch (error) {
-        // Token 无效时的处理
+        console.error('获取产品数据失败:', error);
+      }
+    }
+  },
+  provide() {
+    return {
+      isLoggedIn: !!this.token
+    };
+  },
+
+  async mounted() { // 添加async关键字
+    const token = localStorage.getItem('token');
+    console.log('Mounted, token:', token);
+    if (token) {
+      this.token = token; // 将从localStorage中获取的token赋值给this.token
+      try {
+        const response = await axios.get('http://localhost:3000/protected', {
+          headers: {
+            Authorization: token
+          }
+        });
+        this.message = response.data.message;
+        console.log('protected接口调用成功');
+        this.getProducts();
+        console.log('mounted, calling getProducts');
+      } catch (error) {
         this.errorMessage = 'Token 已过期，请重新登录';
         this.token = null;
         localStorage.removeItem('token');
@@ -175,5 +198,22 @@ button:disabled {
 h1 {
   text-align: center;
   color: #333;
+}
+
+/* 调整退出登录按钮样式 */
+#app > div:nth-child(2) > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#app > div:nth-child(2) > div > h1 {
+  margin: 0; /* 移除 h1 默认的外边距 */
+}
+
+#app > div:nth-child(2) > div > button {
+  width: auto; /* 调整按钮宽度为自适应 */
+  padding: 5px 10px; /* 调整按钮内边距 */
+  font-size: 14px; /* 调整按钮字体大小 */
 }
 </style>
