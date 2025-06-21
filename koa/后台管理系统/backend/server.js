@@ -3,7 +3,9 @@ import Router from '@koa/router';
 import jwt from 'jsonwebtoken';
 import BodyParser from '@koa/bodyparser';
 import Cors from '@koa/cors';
-import productsRouter from './modules/products/products.router.js'; // 注意：加 `.js`
+import productsRouter from './modules/products/products.router.js';
+import usersRouter from './modules/users/users.router.js';
+import menusRouter from './modules/menus/menus.router.js';
 
 const app = new Koa();
 const router = new Router();
@@ -54,7 +56,11 @@ app
   .use(router.routes())
   .use(router.allowedMethods())
   .use(productsRouter.routes())
-  .use(productsRouter.allowedMethods());
+  .use(productsRouter.allowedMethods())
+  .use(usersRouter.routes())
+  .use(usersRouter.allowedMethods())
+  .use(menusRouter.routes())
+  .use(menusRouter.allowedMethods());
 
 app.listen(3000, () => {
   console.log('Server started on port 3000');

@@ -1,23 +1,21 @@
 {
-  "name": "backend-management-system",
+  "name": "koa-admin-system",
   "version": "1.0.0",
-  "private": true,
-  "workspaces": [
-    "backend",
-    "frontend"
-  ],
+  "description": "A full-stack admin system built with Koa.js and Vue.js.",
+  "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
-    "dev:backend": "npm run dev -w backend",
-    "dev:frontend": "npm run dev -w frontend",
-    "build": "npm run build -w frontend",
-    "install:all": "npm install",
-    "clean": "rm -rf node_modules backend/node_modules frontend/node_modules"
+    "postinstall": "npm install --prefix frontend && npm install --prefix backend",
+    "dev": "concurrently \"npm run dev --prefix frontend\" \"npm run dev --prefix backend\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [
+    "koa",
+    "vue",
+    "admin"
+  ],
+  "author": "",
+  "license": "ISC",
   "devDependencies": {
-    "concurrently": "^8.2.0"
-  },
-  "dependencies": {
-    "mysql2": "^3.14.1"
+    "concurrently": "^8.2.2"
   }
 }

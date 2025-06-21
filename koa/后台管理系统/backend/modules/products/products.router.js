@@ -1,23 +1,15 @@
 // backend/modules/products/products.router.js
 
 import Router from '@koa/router';
-
-import {
-  getAllProducts,
-  getProductById,
-  createProduct,
-  updateProduct,
-  deleteProduct
-} from './products.controller.js';
+import productsController from './products.controller.js';
 
 const router = new Router({
   prefix: '/products'
 });
 
-router.get('/', getAllProducts);
-router.get('/:id', getProductById);
-router.post('/', createProduct);
-router.put('/:id', updateProduct);
-router.delete('/:id', deleteProduct);
+router.get('/', productsController.get);
+router.post('/', productsController.add);
+router.put('/:id', productsController.update);
+router.delete('/:id', productsController.remove);
 
 export default router;

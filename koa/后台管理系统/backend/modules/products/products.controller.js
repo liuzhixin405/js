@@ -1,32 +1,54 @@
-import productModel from './products.model.js';
+import productsModel from './products.model.js';
 
-export const getAllProducts = async (ctx) => {
-  try {
-    const products = await productModel.getProducts();
-    ctx.body = products;
-  } catch (error) {
-    console.error('Failed to get all products:', error);
-    ctx.status = 500;
-    ctx.body = { message: 'Failed to get products' };
-  }
-};
+async function get(ctx) {
+    try {
+        const products = await productsModel.getProducts();
+        ctx.body = products;
+    } catch (error) {
+        ctx.status = 500;
+        ctx.body = { message: error.message };
+    }
+}
 
-export const getProductById = async (ctx) => {
-  ctx.status = 501;
-  ctx.body = { message: 'Not Implemented' };
-};
+async function add(ctx) {
+    try {
+        const newProduct = await productsModel.addProduct(ctx.request.body);
+        ctx.status = 201;
+        ctx.body = newProduct;
+    } catch (error) {
+        ctx.status = 500;
+        ctx.body = { message: error.message };
+    }
+}
 
-export const createProduct = async (ctx) => {
-  ctx.status = 501;
-  ctx.body = { message: 'Not Implemented' };
-};
+async function update(ctx) {
+    try {
+        const result = await productsModel.updateProduct(ctx.params.id, ctx.request.body);
+        if (result.affectedRows > 0) {
+            ctx.body = { message: '更新成功' };
+        } else {
+            ctx.status = 404;
+            ctx.body = { message: '商品不存在' };
+        }
+    } catch (error) {
+        ctx.status = 500;
+        ctx.body = { message: error.message };
+    }
+}
 
-export const updateProduct = async (ctx) => {
-  ctx.status = 501;
-  ctx.body = { message: 'Not Implemented' };
-};
+async function remove(ctx) {
+    try {
+        const result = await productsModel.deleteProduct(ctx.params.id);
+        if (result.affectedRows > 0) {
+            ctx.body = { message: '删除成功' };
+        } else {
+            ctx.status = 404;
+            ctx.body = { message: '商品不存在' };
+        }
+    } catch (error) {
+        ctx.status = 500;
+        ctx.body = { message: error.message };
+    }
+}
 
-export const deleteProduct = async (ctx) => {
-  ctx.status = 501;
-  ctx.body = { message: 'Not Implemented' };
-};
+export default { get, add, update, remove };
